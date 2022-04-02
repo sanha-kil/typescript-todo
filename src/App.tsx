@@ -3,6 +3,7 @@ import moment, { Moment } from 'moment';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 import { HiPlusSm } from 'react-icons/hi';
+import TodoElements from './components/TodoElements';
 
 interface TodoListInterface {
   id: string;
@@ -15,7 +16,7 @@ function App(): JSX.Element {
   const [todoInput, setTodoInput] = useState<string>('');
 
   const today: Moment = moment();
-  const day: string = DAY[today.day() - 1];
+  const day: string = DAY[today.day()];
   const adjustedDate: string = today.format('YYYY년 MM월 DD일');
 
   const addTodoElement = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -26,6 +27,19 @@ function App(): JSX.Element {
       content: todoInput,
     };
     setTodoList([...todoList, newElement]);
+    setTodoInput('');
+  };
+
+  const adjustCheck = (id: string): void => {
+    const adjustedList = todoList.map((element) =>
+      id === element.id ? { ...element, isChecked: !element.isChecked } : element,
+    );
+    setTodoList(adjustedList);
+  };
+
+  const deleteTodoElement = (id: string): void => {
+    const adjustedList = todoList.filter((element) => id !== element.id);
+    setTodoList(adjustedList);
   };
 
   return (
@@ -35,7 +49,18 @@ function App(): JSX.Element {
           <TodayInfo>{adjustedDate}</TodayInfo>
           <DayInfo>{day}요일</DayInfo>
         </DateInfoContainer>
-        <TodoElementWrapper>gd</TodoElementWrapper>
+        <TodoElementWrapper>
+          {todoList.map(({ id, isChecked, content }) => (
+            <TodoElements
+              key={id}
+              id={id}
+              content={content}
+              isChecked={isChecked}
+              adjustCheck={adjustCheck}
+              deleteTodoElement={deleteTodoElement}
+            />
+          ))}
+        </TodoElementWrapper>
         <TodoInputForm>
           <TodoInput
             onChange={(event) => setTodoInput(event.target.value)}
@@ -57,7 +82,7 @@ function App(): JSX.Element {
 
 export default App;
 
-const DAY = ['월', '화', '수', '목', '금', '토', '일'];
+const DAY: string[] = ['일', '월', '화', '수', '목', '금', '토'];
 
 const TodoMain = styled.main`
   display: flex;
@@ -92,7 +117,6 @@ const DayInfo = styled.h3`
 `;
 
 const TodoElementWrapper = styled.div`
-  padding: 30px 0;
   width: 100%;
   height: 60vh;
   border-bottom: 1px solid #92a9bd;
